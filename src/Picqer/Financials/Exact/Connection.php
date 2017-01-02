@@ -242,9 +242,9 @@ class Connection
      * @return mixed
      * @throws ApiException
      */
-    public function docs($url, array $params = [])
+    public function getDocs($url, array $params = [])
     {
-        $url = $this->baseUrl . '/docs/' . $url;
+        $url = $this->formatDocsUrl($url);
 
         try {
             $request = $this->createDocsRequest('GET', $url, null, $params);
@@ -271,6 +271,26 @@ class Connection
             $response = $this->client()->send($request);
 
             return $this->parseResponse($response);
+        } catch (Exception $e) {
+            $this->parseExceptionForErrorMessages($e);
+        }
+    }
+
+    /**
+     * @param string $url
+     * @param string $body
+     * @param array  $params
+     * @return mixed
+     */
+    public function postDocs($url, $body, array $params = [])
+    {
+        $url = $this->formatDocsUrl($url);
+
+        try {
+            $request  = $this->createDocsRequest('POST', $url, $body, $params);
+            $response = $this->client()->send($request);
+
+            return $this->parseDocsResponse($response);
         } catch (Exception $e) {
             $this->parseExceptionForErrorMessages($e);
         }
@@ -448,9 +468,10 @@ class Connection
             }
 
             Psr7\rewind_body($response);
-            $xml = simplexml_load_string($response->getBody()->getContents());
 
-            return $xml;
+//            $xml = simplexml_load_string($response->getBody()->getContents());
+
+            return $response->getBody()->getContents();
         } catch (\RuntimeException $e) {
             throw new ApiException($e->getMessage());
         }
@@ -582,6 +603,15 @@ class Connection
 
         return implode('/', [
             $this->getApiUrl(),
+            $endPoint
+        ]);
+    }
+
+    protected function formatDocsUrl($endPoint)
+    {
+        return implode('/', [
+            $this->baseUrl,
+            'docs',
             $endPoint
         ]);
     }
