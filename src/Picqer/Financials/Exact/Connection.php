@@ -100,7 +100,7 @@ class Connection
     /**
      * @return Client
      */
-    private function client()
+    protected function client()
     {
         if ($this->client) {
             return $this->client;
@@ -149,12 +149,50 @@ class Connection
      * @param array $headers
      * @return Request
      */
-    private function createRequest($method = 'GET', $endpoint, $body = null, array $params = [], array $headers = [])
+    protected function createRequest($method = 'GET', $endpoint, $body = null, array $params = [], array $headers = [])
     {
         // Add default json headers to the request
         $headers = array_merge($headers, [
             'Accept' => 'application/json',
             'Content-Type' => 'application/json'
+        ]);
+
+        // If access token is not set or token has expired, acquire new token
+        if (empty($this->accessToken) || $this->tokenHasExpired()) {
+            $this->acquireAccessToken();
+        }
+
+        // If we have a token, sign the request
+        if (!$this->needsAuthentication() && !empty($this->accessToken)) {
+            $headers['Authorization'] = 'Bearer ' . $this->accessToken;
+        }
+
+        // Create param string
+        if (!empty($params)) {
+            $endpoint .= '?' . http_build_query($params);
+        }
+
+        // Create the request
+        $request = new Request($method, $endpoint, $headers, $body);
+
+        return $request;
+    }
+
+    /**
+     * @param string $method
+     * @param $endpoint
+     * @param null $body
+     * @param array $params
+     * @param array $headers
+     * @return Request
+     */
+    protected function createDocsRequest($method = 'GET', $endpoint, $body = null, array $params = [], array $headers =
+    [])
+    {
+        // Add default json headers to the request
+        $headers = array_merge($headers, [
+            'Accept' => 'application/xml',
+            'Content-Type' => 'application/xml'
         ]);
 
         // If access token is not set or token has expired, acquire new token
@@ -200,6 +238,26 @@ class Connection
 
     /**
      * @param $url
+     * @param array $params
+     * @return mixed
+     * @throws ApiException
+     */
+    public function getDocs($url, array $params = [])
+    {
+        $url = $this->formatDocsUrl($url);
+
+        try {
+            $request = $this->createDocsRequest('GET', $url, null, $params);
+            $response = $this->client()->send($request);
+
+            return $this->parseDocsResponse($response);
+        } catch (Exception $e) {
+            $this->parseExceptionForErrorMessages($e);
+        }
+    }
+
+    /**
+     * @param $url
      * @param $body
      * @return mixed
      * @throws ApiException
@@ -213,6 +271,26 @@ class Connection
             $response = $this->client()->send($request);
 
             return $this->parseResponse($response);
+        } catch (Exception $e) {
+            $this->parseExceptionForErrorMessages($e);
+        }
+    }
+
+    /**
+     * @param string $url
+     * @param string $body
+     * @param array  $params
+     * @return mixed
+     */
+    public function postDocs($url, $body, array $params = [])
+    {
+        $url = $this->formatDocsUrl($url);
+
+        try {
+            $request  = $this->createDocsRequest('POST', $url, $body, $params);
+            $response = $this->client()->send($request);
+
+            return $this->parseDocsResponse($response);
         } catch (Exception $e) {
             $this->parseExceptionForErrorMessages($e);
         }
@@ -341,7 +419,7 @@ class Connection
      * @return mixed
      * @throws ApiException
      */
-    private function parseResponse(Response $response)
+    protected function parseResponse(Response $response)
     {
         try {
 
@@ -377,9 +455,32 @@ class Connection
     }
 
     /**
+     * @param Response $response
+     * @return mixed
+     * @throws ApiException
+     */
+    protected function parseDocsResponse(Response $response)
+    {
+        try {
+
+            if ($response->getStatusCode() === 204) {
+                return [];
+            }
+
+            Psr7\rewind_body($response);
+
+//            $xml = simplexml_load_string($response->getBody()->getContents());
+
+            return $response->getBody()->getContents();
+        } catch (\RuntimeException $e) {
+            throw new ApiException($e->getMessage());
+        }
+    }
+
+    /**
      * @return mixed
      */
-    private function getCurrentDivisionNumber()
+    protected function getCurrentDivisionNumber()
     {
         if (empty($this->division)) {
             $me             = new Me($this);
@@ -405,7 +506,7 @@ class Connection
         return $this->accessToken;
     }
 
-    private function acquireAccessToken()
+    protected function acquireAccessToken()
     {
         // If refresh token not yet acquired, do token request
         if (empty($this->refreshToken)) {
@@ -452,7 +553,7 @@ class Connection
     }
 
 
-    private function getDateTimeFromExpires($expires)
+    protected function getDateTimeFromExpires($expires)
     {
         if (!is_numeric($expires)) {
             throw new \InvalidArgumentException('Function requires a numeric expires value');
@@ -477,7 +578,7 @@ class Connection
         $this->tokenExpires = $tokenExpires;
     }
 
-    private function tokenHasExpired()
+    protected function tokenHasExpired()
     {
         if (empty($this->tokenExpires)) {
             return true;
@@ -486,7 +587,7 @@ class Connection
         return $this->tokenExpires <= time();
     }
 
-    private function formatUrl($endPoint, $includeDivision = true, $formatNextUrl = false)
+    protected function formatUrl($endPoint, $includeDivision = true, $formatNextUrl = false)
     {
         if ($formatNextUrl) {
             return $endPoint;
@@ -502,6 +603,15 @@ class Connection
 
         return implode('/', [
             $this->getApiUrl(),
+            $endPoint
+        ]);
+    }
+
+    protected function formatDocsUrl($endPoint)
+    {
+        return implode('/', [
+            $this->baseUrl,
+            'docs',
             $endPoint
         ]);
     }
@@ -537,7 +647,7 @@ class Connection
      * @param Exception $e
      * @throws ApiException
      */
-    private function parseExceptionForErrorMessages(Exception $e)
+    protected function parseExceptionForErrorMessages(Exception $e)
     {
         if (! $e instanceof BadResponseException) {
             throw new ApiException($e->getMessage());
@@ -568,7 +678,7 @@ class Connection
     /**
      * @return string
      */
-    private function getApiUrl()
+    protected function getApiUrl()
     {
         return $this->baseUrl . $this->apiUrl;
     }
@@ -576,7 +686,7 @@ class Connection
     /**
      * @return string
      */
-    private function getTokenUrl()
+    protected function getTokenUrl()
     {
         return $this->baseUrl . $this->tokenUrl;
     }
