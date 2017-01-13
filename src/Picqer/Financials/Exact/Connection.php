@@ -670,7 +670,7 @@ class Connection
     /**
      * @return string
      */
-    protected function getBaseUrl()
+    public function getBaseUrl()
     {
         return $this->baseUrl;
     }
@@ -678,7 +678,7 @@ class Connection
     /**
      * @return string
      */
-    protected function getApiUrl()
+    public function getApiUrl()
     {
         return $this->baseUrl . $this->apiUrl;
     }
@@ -686,7 +686,7 @@ class Connection
     /**
      * @return string
      */
-    protected function getTokenUrl()
+    public function getTokenUrl()
     {
         return $this->baseUrl . $this->tokenUrl;
     }
