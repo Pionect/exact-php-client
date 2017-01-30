@@ -5,11 +5,11 @@ trait Findable
 
     public function find($id)
     {
-        $result = $this->connection()->get($this->url, [
-            '$filter' => $this->primaryKey . " eq guid'$id'"
-        ]);
+        $url = "{$this->url}?{$this->primaryKey}=guid'{$id}'";
+        $result = $this->connection()->get($url);
+        unset($result[0]['__metadata']);
 
-        return new self($this->connection(), $result);
+        return new self($this->connection(), $result[0]);
     }
 
 
