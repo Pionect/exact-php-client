@@ -13,11 +13,9 @@ trait Findable
     public function findWithParams($params)
     {
         $params = collect($params)->map(function($value, $param) {
-            if ($param == $this->primaryKey) {
-                $pieces = explode('-', $value);
-                if (strlen($value) == 36 && count($pieces) == 5) {
-                    $value = "guid'{$value}'";
-                }
+            $pattern = '/^\{?[A-Z0-9]{8}-[A-Z0-9]{4}-[A-Z0-9]{4}-[A-Z0-9]{4}-[A-Z0-9]{12}\}?$/';
+            if (preg_match($pattern, $value)) {
+                $value = "guid'{$value}'";
             }
             return $param . '=' . urlencode($value);
         })->implode('&');
