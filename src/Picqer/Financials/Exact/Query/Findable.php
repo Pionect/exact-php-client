@@ -12,6 +12,18 @@ trait Findable
         return new self($this->connection(), $result[0]);
     }
 
+    public function findWithParams($params)
+    {
+        $params = collect($params)->map(function($value, $attribute) {
+            return $attribute . '="' . $value . '"';
+        })->implode('&');
+
+        $url = "{$this->url}?{$params}";
+        $result = $this->connection()->get($url);
+        unset($result[0]['__metadata']);
+
+        return new self($this->connection(), $result[0]);
+    }
 
     public function findWithSelect($id, $select = '')
     {
