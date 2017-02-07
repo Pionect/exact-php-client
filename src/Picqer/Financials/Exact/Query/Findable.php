@@ -15,8 +15,8 @@ trait Findable
 
     public function findWithParams($params)
     {
-        $params = collect($params)->map(function($value, $attribute) {
-            return $attribute . '=' . urlencode($value);
+        $params = collect($params)->map(function($value, $param) {
+            return $param . '=' . urlencode($value);
         })->implode('&');
 
         $url = "{$this->url}?{$params}";
