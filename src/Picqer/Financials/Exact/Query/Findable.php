@@ -5,7 +5,8 @@ trait Findable
 
     public function find($id)
     {
-        $url = "{$this->url}?{$this->primaryKey}=guid'{$id}'";
+        $url = "{$this->url}?{$this->primaryKey}=" . urlencode("guid'{$id}'");
+
         $result = $this->connection()->get($url);
         unset($result[0]['__metadata']);
 
