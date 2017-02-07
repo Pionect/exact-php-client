@@ -5,17 +5,20 @@ trait Findable
 
     public function find($id)
     {
-        $url = "{$this->url}?{$this->primaryKey}=" . urlencode("guid'{$id}'");
-
-        $result = $this->connection()->get($url);
-        unset($result[0]['__metadata']);
-
-        return new self($this->connection(), $result[0]);
+        return $this->findWithParams([
+            $this->primaryKey => $id
+        ]);
     }
 
     public function findWithParams($params)
     {
         $params = collect($params)->map(function($value, $param) {
+            if ($param == $this->primaryKey) {
+                $pieces = explode('-', $value);
+                if (strlen($value) == 36 && count($pieces) == 5) {
+                    $value = "guid'{$value}'";
+                }
+            }
             return $param . '=' . urlencode($value);
         })->implode('&');
 
