@@ -13,7 +13,7 @@ trait Findable
     public function findWithParams($params)
     {
         $params = collect($params)->map(function($value, $param) {
-            $pattern = '/^\{?[A-Z0-9]{8}-[A-Z0-9]{4}-[A-Z0-9]{4}-[A-Z0-9]{4}-[A-Z0-9]{12}\}?$/';
+            $pattern = '/^\{?[a-zA-Z0-9]{8}-[a-zA-Z0-9]{4}-[a-zA-Z0-9]{4}-[a-zA-Z0-9]{4}-[a-zA-Z0-9]{12}\}?$/';
             if (preg_match($pattern, $value)) {
                 $value = "guid'{$value}'";
             }
