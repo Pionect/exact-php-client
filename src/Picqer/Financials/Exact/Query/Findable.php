@@ -5,13 +5,27 @@ trait Findable
 
     public function find($id)
     {
-        $url = "{$this->url}?{$this->primaryKey}=guid'{$id}'";
+        return $this->findWithParams([
+            $this->primaryKey => $id
+        ]);
+    }
+
+    public function findWithParams($params)
+    {
+        $params = collect($params)->map(function($value, $param) {
+            $pattern = '/^\{?[a-zA-Z0-9]{8}-[a-zA-Z0-9]{4}-[a-zA-Z0-9]{4}-[a-zA-Z0-9]{4}-[a-zA-Z0-9]{12}\}?$/';
+            if (preg_match($pattern, $value)) {
+                $value = "guid'{$value}'";
+            }
+            return $param . '=' . urlencode($value);
+        })->implode('&');
+
+        $url = "{$this->url}?{$params}";
         $result = $this->connection()->get($url);
         unset($result[0]['__metadata']);
 
         return new self($this->connection(), $result[0]);
     }
-
 
     public function findWithSelect($id, $select = '')
     {
