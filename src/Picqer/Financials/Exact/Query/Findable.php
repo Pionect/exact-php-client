@@ -2,14 +2,40 @@
 
 trait Findable
 {
-
+    /**
+     * Finds a model by its ID using filter
+     *
+     * @param string $id
+     * @return Findable
+     */
     public function find($id)
+    {
+        $result = $this->connection()->get($this->url, [
+            '$filter' => $this->primaryKey . " eq guid'$id'"
+        ]);
+
+        return new self($this->connection(), $result);
+    }
+
+    /**
+     * Finds a model by its ID using a key/value query string
+     *
+     * @param string $id
+     * @return Findable
+     */
+    public function findById($id)
     {
         return $this->findWithParams([
             $this->primaryKey => $id
         ]);
     }
 
+    /**
+     * Finds models using a key/value query string
+     *
+     * @param array $params
+     * @return Findable
+     */
     public function findWithParams($params)
     {
         $params = collect($params)->map(function($value, $param) {
