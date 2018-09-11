@@ -1,4 +1,6 @@
-<?php namespace Picqer\Financials\Exact;
+<?php
+
+namespace Picqer\Financials\Exact;
 
 /**
  * Class ReceivableList
@@ -8,7 +10,7 @@
  *
  * @property Int64 $HID Human readable ID, Primary key
  * @property String $AccountCode Code of the Account
- * @property Guid $AccountId Reference to the account
+ * @property string $AccountId Reference to the account
  * @property String $AccountName Name of Account
  * @property Double $Amount Amount
  * @property Double $AmountInTransit Amount in transit
@@ -16,7 +18,7 @@
  * @property String $Description Description
  * @property DateTime $DueDate Date the invoice should be paid
  * @property Int32 $EntryNumber Entry number
- * @property Guid $Id Obsolete
+ * @property string $Id Obsolete
  * @property DateTime $InvoiceDate Invoice date
  * @property Int32 $InvoiceNumber Invoice number
  * @property String $JournalCode Code of Journal
@@ -25,7 +27,6 @@
  */
 class ReceivableList extends Model
 {
-
     use Query\Findable;
 
     protected $primaryKey = 'HID';
@@ -46,9 +47,8 @@ class ReceivableList extends Model
 		'InvoiceNumber',
 		'JournalCode',
 		'JournalDescription',
-		'YourRef'
+		'YourRef',
     ];
 
     protected $url = 'read/financial/ReceivablesList';
-
 }

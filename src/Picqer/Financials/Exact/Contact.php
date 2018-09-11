@@ -1,4 +1,6 @@
-<?php namespace Picqer\Financials\Exact;
+<?php
+
+namespace Picqer\Financials\Exact;
 
 /**
  * Class Contact
@@ -6,11 +8,11 @@
  * @package Picqer\Financials\Exact
  * @see https://start.exactonline.nl/docs/HlpRestAPIResourcesDetails.aspx?name=crmContacts
  *
- * @property Guid $ID Primary key
- * @property Guid $Account The account to which the contact belongs
+ * @property string $ID Primary key
+ * @property string $Account The account to which the contact belongs
  * @property Boolean $AccountIsCustomer Indicates if account is a customer
  * @property Boolean $AccountIsSupplier Indicates if account is a supplier
- * @property Guid $AccountMainContact Reference to the main contact of the account
+ * @property string $AccountMainContact Reference to the main contact of the account
  * @property String $AccountName Name of the account
  * @property String $AddressLine2 Second address line
  * @property String $AddressStreet Street name of the address
@@ -30,7 +32,7 @@
  * @property String $Code Code of the account
  * @property String $Country Country code
  * @property DateTime $Created Creation date
- * @property Guid $Creator User ID of the creator
+ * @property string $Creator User ID of the creator
  * @property String $CreatorFullName Name of the creator
  * @property Int32 $Division Division code
  * @property String $Email Email address of the contact
@@ -40,8 +42,8 @@
  * @property String $Gender Gender: M=Male, V=Female, O=Unknown
  * @property Int32 $HID Contact ID
  * @property DateTime $IdentificationDate Identification date
- * @property Guid $IdentificationDocument Reference to the identification document of the contact
- * @property Guid $IdentificationUser Reference to the user responsible for identification
+ * @property string $IdentificationDocument Reference to the identification document of the contact
+ * @property string $IdentificationUser Reference to the user responsible for identification
  * @property String $Initials Initials
  * @property Boolean $IsMailingExcluded Indicates whether contacts are excluded from the marketing list
  * @property Boolean $IsMainContact Indicates if this is the main contact of the linked account
@@ -52,13 +54,13 @@
  * @property String $MiddleName Middle name
  * @property String $Mobile Business phone of the contact
  * @property DateTime $Modified Last modified date
- * @property Guid $Modifier User ID of modifier
+ * @property string $Modifier User ID of modifier
  * @property String $ModifierFullName Name of the last modifier
  * @property String $Nationality Nationality
  * @property String $Notes Extra remarks
  * @property String $PartnerName Last name of partner
  * @property String $PartnerNamePrefix Middlename of partner
- * @property Guid $Person Reference to the personal information of this contact such as name, gender, address etc.
+ * @property string $Person Reference to the personal information of this contact such as name, gender, address etc.
  * @property String $Phone Phone of the contact
  * @property String $PhoneExtension Phone extension of the contact
  * @property Binary $Picture This field is write-only. The picture can be downloaded through PictureUrl and PictureThumbnailUrl.
@@ -70,10 +72,14 @@
  * @property DateTime $StartDate Start date
  * @property String $State State
  * @property String $Title Title
+ *
+ * Note: Due to the way Storable is setup and the way the Exact Online API works certain fields overwrite
+ * each other. For example: If you fill the BusinessEmail but not the Email field the latter will overwrite
+ * the first. This also applies to the BusinessMobile and Mobile field and the BusinessPhone and Phone field.
+ * It is best practice to use the 'main' fields (Email, Mobile and Phone).
  */
 class Contact extends Model
 {
-
     use Query\Findable;
     use Persistance\Storable;
 
@@ -141,7 +147,7 @@ class Contact extends Model
         'SocialSecurityNumber',
         'StartDate',
         'State',
-        'Title'
+        'Title',
     ];
 
     protected $url = 'crm/Contacts';

@@ -1,4 +1,6 @@
-<?php namespace Picqer\Financials\Exact;
+<?php
+
+namespace Picqer\Financials\Exact;
 
 /**
  * Class SubscriptionLine
@@ -6,7 +8,7 @@
  * @package Picqer\Financials\Exact
  * @see https://start.exactonline.nl/docs/HlpRestAPIResourcesDetails.aspx?name=SubscriptionSubscriptionLines
  *
- * @property Guid $ID Primary key
+ * @property string $ID Primary key
  * @property Double $AmountDC Amount in the default currency of the company
  * @property Double $AmountFC Amount in the currency of the transaction
  * @property String $Costcenter Cost center
@@ -14,9 +16,9 @@
  * @property String $Description Description
  * @property Double $Discount Discount percentage
  * @property Int32 $Division Division code
- * @property Guid $EntryID Entry ID
+ * @property string $EntryID Entry ID
  * @property DateTime $FromDate From date
- * @property Guid $Item Reference to Item
+ * @property string $Item Reference to Item
  * @property String $ItemDescription Description of Item
  * @property Int32 $LineNumber Line number
  * @property Int16 $LineType Reference to LineType
@@ -34,7 +36,6 @@
  */
 class SubscriptionLine extends Model
 {
-
     use Query\Findable;
     use Persistance\Storable;
 
@@ -67,5 +68,4 @@ class SubscriptionLine extends Model
     ];
 
     protected $url = 'subscription/SubscriptionLines';
-
 }
